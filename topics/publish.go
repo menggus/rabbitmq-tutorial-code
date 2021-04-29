@@ -21,20 +21,20 @@ func main() {
 
 	// 3. 声明代理 exchange 这次使用的类型是 direct
 	err = ch.ExchangeDeclare(
-		"logs_direct", // name
-		"direct",      // type
-		true,          // durable  持久
-		false,         // auto-deleted 自动删除
-		false,         // internal 内部
-		false,         // no-wait
-		nil,           // arguments
+		"logs_topic", // name
+		"topic",      // type
+		true,         // durable  持久
+		false,        // auto-deleted 自动删除
+		false,        // internal 内部
+		false,        // no-wait
+		nil,          // arguments
 	)
 	mere.FailOnError(err, mere.EXCHANGE_ERROR)
 
 	// 4. 发布消息
 	body := bodyForm(os.Args)
 	err = ch.Publish(
-		"logs_direct",         // exchange name
+		"logs_topic",          // exchange name
 		severityForm(os.Args), // route key
 		false,                 // mandatory 强制性
 		false,                 // immediate  立即
@@ -63,7 +63,7 @@ func bodyForm(args []string) string {
 func severityForm(args []string) string {
 	var s string
 	if len(args) < 2 || args[1] == "" {
-		s = "info"
+		s = "anonymous.info"
 	} else {
 		s = args[1]
 	}

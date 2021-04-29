@@ -7,6 +7,21 @@ import (
 	"rabbitmq_demo/mere"
 )
 
+// To receive all the logs, you can:
+// go run receive.go "#"
+
+// TO receive all logs from the facility "kern", you can:
+// go run receive.go "kern.*"
+
+// if you want to hear only about "critical" logs, you can:
+// gi run receive.go "*.critical"
+
+// you can create multiple bindings
+// go run receive.go "kern.*" "*.critical"
+
+// emit a message with a routing key "kern.critical" type:
+// go run publish.go "kern.critical" "A critical kernel error"
+
 func main() {
 	// 1. 建立与 rabbitmq 的连接
 	connect, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
@@ -20,8 +35,8 @@ func main() {
 
 	// 3. 声明 exchange 这里使用的类型是 direct
 	err = ch.ExchangeDeclare(
-		"logs_direct",
-		"direct",
+		"logs_topic",
+		"topic",
 		true,
 		false,
 		false,
@@ -44,7 +59,7 @@ func main() {
 	for _, s := range os.Args[1:] {
 		log.Printf("Binding queue %s to exchange %s with routing key %s", q, "logs_direct", s)
 
-		err = ch.QueueBind(q.Name, s, "logs_direct", false, nil)
+		err = ch.QueueBind(q.Name, s, "logs_topic", false, nil)
 		mere.FailOnError(err, mere.QUEUE_BIND_ERROR)
 	}
 
